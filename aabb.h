@@ -6,10 +6,7 @@
 class aabb {
  public:
   aabb() {}
-  aabb(const point3& a, const point3& b) {
-    minimum = a;
-    maximum = b;
-  }
+  aabb(const point3& a, const point3& b) : minimum(a), maximum(b) {}
 
   point3 min() const { return minimum; }
   point3 max() const { return maximum; }
