@@ -5,23 +5,7 @@
 
 #include "perlin.h"
 #include "rtweekend.h"
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Wshadow"
-#pragma GCC diagnostic ignored "-Wimplicit-int-conversion"
-#pragma GCC diagnostic ignored "-Wdouble-promotion"
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
-#pragma clang diagnostic ignored "-Wshadow"
-#pragma clang diagnostic ignored "-Wimplicit-int-conversion"
-#pragma clang diagnostic ignored "-Wdouble-promotion"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
-#pragma GCC diagnostic pop
-#pragma clang diagnostic pop
+#include "my_stb_image.h"
 
 class texture {
  public:

@@ -8,6 +8,7 @@
 #include "hittable_list.h"
 #include "material.h"
 #include "moving_sphere.h"
+#include "my_stb_image.h"
 #include "rtweekend.h"
 #include "sphere.h"
 #include "texture.h"
@@ -262,6 +263,33 @@ hittable_list final_scene() {
   return objects;
 }
 
+void write_pixel(std::unique_ptr<unsigned char>& image_data, int pixel_index,
+                 const color& pixel_color, int samples_per_pixel) {
+  auto r = pixel_color.x();
+  auto g = pixel_color.y();
+  auto b = pixel_color.z();
+
+  // Replace NaN components with zero. See explanation in Ray Tracing: The
+  // Rest of Your Life.
+  if (r != r) r = 0.0;
+  if (g != g) g = 0.0;
+  if (b != b) b = 0.0;
+
+  // Divide the color by the number of samples and gamma-correct for
+  // gamma=2.0.
+  auto scale = 1.0 / samples_per_pixel;
+  r = sqrt(scale * r);
+  g = sqrt(scale * g);
+  b = sqrt(scale * b);
+
+  image_data.get()[pixel_index + 0] =
+      static_cast<unsigned char>(256 * clamp(r, 0.0, 0.999));
+  image_data.get()[pixel_index + 1] =
+      static_cast<unsigned char>(256 * clamp(g, 0.0, 0.999));
+  image_data.get()[pixel_index + 2] =
+      static_cast<unsigned char>(256 * clamp(b, 0.0, 0.999));
+}
+
 int main() {
   // Image
 
@@ -363,13 +391,17 @@ int main() {
   camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus,
              0.0, 1.0);
 
-  // Render
+  std::unique_ptr<unsigned char> image_data(
+      new unsigned char[static_cast<unsigned long>(image_width * image_height *
+                                                   3)]);
 
-  std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
+  // Render
 
   for (int j = image_height - 1; j >= 0; --j) {
     std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
     for (int i = 0; i < image_width; ++i) {
+      const auto pixel_index = ((image_height - 1 - j) * image_width + i) * 3;
+
       color pixel_color(0, 0, 0);
       for (int s = 0; s < samples_per_pixel; ++s) {
         auto u = (i + random_double()) / (image_width - 1);
@@ -377,9 +409,13 @@ int main() {
         ray r = cam.get_ray(u, v);
         pixel_color += ray_color(r, background, world, max_depth);
       }
-      write_color(std::cout, pixel_color, samples_per_pixel);
+
+      write_pixel(image_data, pixel_index, pixel_color, samples_per_pixel);
     }
   }
+
+  stbi_write_png("image.png", image_width, image_height, 3, image_data.get(),
+                 image_width * 3);
 
   std::cerr << "\nDone.\n";
 }
