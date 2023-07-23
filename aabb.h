@@ -1,7 +1,8 @@
 #ifndef AABB_H
 #define AABB_H
 
-#include "rtweekend.h"
+#include "vec3.h"
+#include "ray.h"
 
 class aabb {
  public:

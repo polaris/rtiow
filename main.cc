@@ -1,4 +1,6 @@
+#include <chrono>
 #include <iostream>
+#include <thread>
 
 #include "box.h"
 #include "bvh.h"
@@ -12,6 +14,7 @@
 #include "rtweekend.h"
 #include "sphere.h"
 #include "texture.h"
+#include "thread_pool.h"
 
 color ray_color(const ray& r, const color& background, const hittable& world,
                 int depth) {
@@ -391,27 +394,45 @@ int main() {
   camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus,
              0.0, 1.0);
 
+  // Render
+
   std::unique_ptr<unsigned char> image_data(
       new unsigned char[static_cast<unsigned long>(image_width * image_height *
                                                    3)]);
-
-  // Render
+  thread_pool pool(4);
+  std::vector<std::future<void>> results;
 
   for (int j = image_height - 1; j >= 0; --j) {
-    std::cerr << "\rScanlines remaining: " << j << ' ' << std::flush;
-    for (int i = 0; i < image_width; ++i) {
-      const auto pixel_index = ((image_height - 1 - j) * image_width + i) * 3;
-
-      color pixel_color(0, 0, 0);
-      for (int s = 0; s < samples_per_pixel; ++s) {
-        auto u = (i + random_double()) / (image_width - 1);
-        auto v = (j + random_double()) / (image_height - 1);
-        ray r = cam.get_ray(u, v);
-        pixel_color += ray_color(r, background, world, max_depth);
+    results.emplace_back(pool.enqueue([j, &image_data, &image_width,
+                                       &image_height, &samples_per_pixel, &cam,
+                                       &background, &world, &max_depth]() {
+      // print thread Id
+      auto start = std::chrono::steady_clock::now();
+      for (int i = 0; i < image_width; ++i) {
+        const auto pixel_index = ((image_height - 1 - j) * image_width + i) * 3;
+        color pixel_color(0, 0, 0);
+        for (int s = 0; s < samples_per_pixel; ++s) {
+          const auto u = (i + random_double()) / (image_width - 1);
+          const auto v = (j + random_double()) / (image_height - 1);
+          const ray r = cam.get_ray(u, v);
+          pixel_color += ray_color(r, background, world, max_depth);
+        }
+        write_pixel(image_data, pixel_index, pixel_color, samples_per_pixel);
       }
+      auto end = std::chrono::steady_clock::now();
 
-      write_pixel(image_data, pixel_index, pixel_color, samples_per_pixel);
-    }
+      // Calculate the duration in microseconds (or other time units if desired)
+      auto duration =
+          std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+              .count();
+      std::cout << "\rFinished rendering scanline: " << j << " on thread "
+                << std::this_thread::get_id() << ". Time taken " << duration / 1000000.0
+                << " seconds." << std::endl;
+    }));
+  }
+
+  for (auto&& result : results) {
+    result.get();
   }
 
   stbi_write_png("image.png", image_width, image_height, 3, image_data.get(),

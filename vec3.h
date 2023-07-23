@@ -1,6 +1,8 @@
 #ifndef VEC3_H
 #define VEC3_H
 
+#include "rtweekend.h"
+
 #include <cmath>
 #include <iostream>
 
@@ -142,5 +144,9 @@ inline vec3 refract(const vec3 &uv, const vec3 &n, double etai_over_etat) {
   vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.length_squared())) * n;
   return r_out_perp + r_out_parallel;
 }
+
+bool operator==(const vec3 &u, const vec3 &v);
+
+bool operator!=(const vec3 &u, const vec3 &v);
 
 #endif
