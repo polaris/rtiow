@@ -405,33 +405,38 @@ int main() {
   std::unique_ptr<unsigned char> image_data(
       new unsigned char[static_cast<unsigned long>(image_width * image_height *
                                                    3)]);
-  const int num_threads = 4;
+  const int num_threads =
+      std::thread::hardware_concurrency(); // Use all available cores
   thread_pool pool(num_threads);
-  std::vector<std::future<void>> results;
 
-  auto start = std::chrono::steady_clock::now();
+  const int blockSize = 2;
 
-  for (int j = image_height - 1; j >= 0; --j) {
-    results.emplace_back(pool.enqueue([j, &image_data, &image_width,
-                                       &image_height, &samples_per_pixel, &cam,
-                                       &background, &world, &max_depth]() {
-      for (int i = 0; i < image_width; ++i) {
-        const auto pixel_index = ((image_height - 1 - j) * image_width + i) * 3;
-        color pixel_color(0, 0, 0);
-        for (int s = 0; s < samples_per_pixel; ++s) {
-          const auto u = (i + random_double()) / (image_width - 1);
-          const auto v = (j + random_double()) / (image_height - 1);
-          const ray r = cam.get_ray(u, v);
-          pixel_color += ray_color(r, background, world, max_depth);
+  const auto start = std::chrono::steady_clock::now();
+
+  for (int blockStart = image_height - 1; blockStart >= 0;
+       blockStart -= blockSize) {
+    pool.enqueue([blockStart, blockSize, &image_data, &image_width,
+                  &image_height, &samples_per_pixel, &cam, &background, &world,
+                  &max_depth]() {
+      const int blockEnd = std::max(0, blockStart - blockSize);
+      for (int j = blockStart; j > blockEnd; --j) {
+        for (int i = 0; i < image_width; ++i) {
+          const auto pixel_index =
+              ((image_height - 1 - j) * image_width + i) * 3;
+          color pixel_color(0, 0, 0);
+          for (int s = 0; s < samples_per_pixel; ++s) {
+            const auto u = (i + random_double()) / (image_width - 1);
+            const auto v = (j + random_double()) / (image_height - 1);
+            const ray r = cam.get_ray(u, v);
+            pixel_color += ray_color(r, background, world, max_depth);
+          }
+          write_pixel(image_data, pixel_index, pixel_color, samples_per_pixel);
         }
-        write_pixel(image_data, pixel_index, pixel_color, samples_per_pixel);
       }
-    }));
+    });
   }
 
-  for (auto &&result : results) {
-    result.get();
-  }
+  pool.wait();
 
   auto end = std::chrono::steady_clock::now();
   auto duration =

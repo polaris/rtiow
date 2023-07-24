@@ -10,7 +10,7 @@
 
 class thread_pool {
 public:
-  thread_pool(size_t threads) : stop(false) {
+  thread_pool(size_t threads) : stop(false), active_tasks(0) {
     for (size_t i = 0; i < threads; ++i)
       workers.emplace_back([this] {
         for (;;) {
@@ -46,10 +46,23 @@ public:
       if (stop)
         throw std::runtime_error("enqueue on stopped ThreadPool");
 
-      tasks.emplace([task]() { (*task)(); });
+      tasks.emplace([this, task]() {
+        (*task)();
+        std::unique_lock<std::mutex> lock(this->queue_mutex);
+        --this->active_tasks;
+        this->condition.notify_all();
+      });
+      ++this->active_tasks;
     }
     condition.notify_one();
     return res;
+  }
+
+  void wait() {
+    std::unique_lock<std::mutex> lock(queue_mutex);
+    condition.wait(lock, [this] {
+      return this->tasks.empty() && this->active_tasks == 0;
+    });
   }
 
   ~thread_pool() {
@@ -68,6 +81,7 @@ private:
   std::mutex queue_mutex;
   std::condition_variable condition;
   bool stop;
+  std::atomic<int> active_tasks;
 };
 
 #endif
