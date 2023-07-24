@@ -24,8 +24,10 @@ inline double degrees_to_radians(double degrees) {
 }
 
 inline double clamp(double x, double min, double max) {
-  if (x < min) return min;
-  if (x > max) return max;
+  if (x < min)
+    return min;
+  if (x > max)
+    return max;
   return x;
 }
 

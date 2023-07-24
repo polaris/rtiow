@@ -5,25 +5,25 @@
 #include "rtweekend.h"
 
 class sphere : public hittable {
- public:
+public:
   sphere() {}
 
   sphere(point3 cen, double r, shared_ptr<material> m)
       : center(cen), radius(r), mat_ptr(m){};
 
-  virtual bool hit(const ray& r, double t_min, double t_max,
-                   hit_record& rec) const override;
+  virtual bool hit(const ray &r, double t_min, double t_max,
+                   hit_record &rec) const override;
 
   virtual bool bounding_box(double time0, double time1,
-                            aabb& output_box) const override;
+                            aabb &output_box) const override;
 
- public:
+public:
   point3 center;
   double radius;
   shared_ptr<material> mat_ptr;
 
- private:
-  static void get_sphere_uv(const point3& p, double& u, double& v) {
+private:
+  static void get_sphere_uv(const point3 &p, double &u, double &v) {
     // p: a given point on the sphere of radius one, centered at the origin.
     // u: returned value [0,1] of angle around the Y axis from X=-1.
     // v: returned value [0,1] of angle from Y=-1 to Y=+1.
@@ -40,28 +40,30 @@ class sphere : public hittable {
 };
 
 bool sphere::bounding_box(double /* time0 */, double /* time1 */,
-                          aabb& output_box) const {
+                          aabb &output_box) const {
   output_box = aabb(center - vec3(radius, radius, radius),
                     center + vec3(radius, radius, radius));
   return true;
 }
 
-bool sphere::hit(const ray& r, double t_min, double t_max,
-                 hit_record& rec) const {
+bool sphere::hit(const ray &r, double t_min, double t_max,
+                 hit_record &rec) const {
   vec3 oc = r.origin() - center;
   auto a = r.direction().length_squared();
   auto half_b = dot(oc, r.direction());
   auto c = oc.length_squared() - radius * radius;
 
   auto discriminant = half_b * half_b - a * c;
-  if (discriminant < 0) return false;
+  if (discriminant < 0)
+    return false;
   auto sqrtd = sqrt(discriminant);
 
   // Find the nearest root that lies in the acceptable range.
   auto root = (-half_b - sqrtd) / a;
   if (root < t_min || t_max < root) {
     root = (-half_b + sqrtd) / a;
-    if (root < t_min || t_max < root) return false;
+    if (root < t_min || t_max < root)
+      return false;
   }
 
   rec.t = root;

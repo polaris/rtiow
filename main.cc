@@ -16,21 +16,24 @@
 #include "texture.h"
 #include "thread_pool.h"
 
-color ray_color(const ray& r, const color& background, const hittable& world,
+color ray_color(const ray &r, const color &background, const hittable &world,
                 int depth) {
   hit_record rec;
 
   // If we've exceeded the ray bounce limit, no more light is gathered.
-  if (depth <= 0) return color(0, 0, 0);
+  if (depth <= 0)
+    return color(0, 0, 0);
 
   // If the ray hits nothing, return the background color.
-  if (!world.hit(r, 0.001, infinity, rec)) return background;
+  if (!world.hit(r, 0.001, infinity, rec))
+    return background;
 
   ray scattered;
   color attenuation;
   color emitted = rec.mat_ptr->emitted(rec.u, rec.v, rec.p);
 
-  if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered)) return emitted;
+  if (!rec.mat_ptr->scatter(r, rec, attenuation, scattered))
+    return emitted;
 
   return emitted +
          attenuation * ray_color(scattered, background, world, depth - 1);
@@ -266,17 +269,20 @@ hittable_list final_scene() {
   return objects;
 }
 
-void write_pixel(std::unique_ptr<unsigned char>& image_data, int pixel_index,
-                 const color& pixel_color, int samples_per_pixel) {
+void write_pixel(std::unique_ptr<unsigned char> &image_data, int pixel_index,
+                 const color &pixel_color, int samples_per_pixel) {
   auto r = pixel_color.x();
   auto g = pixel_color.y();
   auto b = pixel_color.z();
 
   // Replace NaN components with zero. See explanation in Ray Tracing: The
   // Rest of Your Life.
-  if (r != r) r = 0.0;
-  if (g != g) g = 0.0;
-  if (b != b) b = 0.0;
+  if (r != r)
+    r = 0.0;
+  if (g != g)
+    g = 0.0;
+  if (b != b)
+    b = 0.0;
 
   // Divide the color by the number of samples and gamma-correct for
   // gamma=2.0.
@@ -312,77 +318,77 @@ int main() {
   color background(0, 0, 0);
 
   switch (0) {
-    case 1:
-      world = random_scene();
-      background = color(0.70, 0.80, 1.00);
-      lookfrom = point3(13, 2, 3);
-      lookat = point3(0, 0, 0);
-      vfov = 20.0;
-      aperture = 0.1;
-      break;
+  case 1:
+    world = random_scene();
+    background = color(0.70, 0.80, 1.00);
+    lookfrom = point3(13, 2, 3);
+    lookat = point3(0, 0, 0);
+    vfov = 20.0;
+    aperture = 0.1;
+    break;
 
-    case 2:
-      world = two_spheres();
-      background = color(0.70, 0.80, 1.00);
-      lookfrom = point3(13, 2, 3);
-      lookat = point3(0, 0, 0);
-      vfov = 20.0;
-      break;
+  case 2:
+    world = two_spheres();
+    background = color(0.70, 0.80, 1.00);
+    lookfrom = point3(13, 2, 3);
+    lookat = point3(0, 0, 0);
+    vfov = 20.0;
+    break;
 
-    case 3:
-      world = two_perlin_spheres();
-      background = color(0.70, 0.80, 1.00);
-      lookfrom = point3(13, 2, 3);
-      lookat = point3(0, 0, 0);
-      vfov = 20.0;
-      break;
+  case 3:
+    world = two_perlin_spheres();
+    background = color(0.70, 0.80, 1.00);
+    lookfrom = point3(13, 2, 3);
+    lookat = point3(0, 0, 0);
+    vfov = 20.0;
+    break;
 
-    case 4:
-      world = earth();
-      background = color(0.70, 0.80, 1.00);
-      lookfrom = point3(0, 0, 12);
-      lookat = point3(0, 0, 0);
-      vfov = 20.0;
-      break;
+  case 4:
+    world = earth();
+    background = color(0.70, 0.80, 1.00);
+    lookfrom = point3(0, 0, 12);
+    lookat = point3(0, 0, 0);
+    vfov = 20.0;
+    break;
 
-    case 5:
-      world = simple_light();
-      samples_per_pixel = 400;
-      lookfrom = point3(26, 3, 6);
-      lookat = point3(0, 2, 0);
-      vfov = 20.0;
-      break;
+  case 5:
+    world = simple_light();
+    samples_per_pixel = 400;
+    lookfrom = point3(26, 3, 6);
+    lookat = point3(0, 2, 0);
+    vfov = 20.0;
+    break;
 
-    case 6:
-      world = cornell_box();
-      aspect_ratio = 1.0;
-      image_width = 600;
-      samples_per_pixel = 200;
-      lookfrom = point3(278, 278, -800);
-      lookat = point3(278, 278, 0);
-      vfov = 40.0;
-      break;
+  case 6:
+    world = cornell_box();
+    aspect_ratio = 1.0;
+    image_width = 600;
+    samples_per_pixel = 200;
+    lookfrom = point3(278, 278, -800);
+    lookat = point3(278, 278, 0);
+    vfov = 40.0;
+    break;
 
-    case 7:
-      world = cornell_smoke();
-      aspect_ratio = 1.0;
-      image_width = 600;
-      samples_per_pixel = 200;
-      lookfrom = point3(278, 278, -800);
-      lookat = point3(278, 278, 0);
-      vfov = 40.0;
-      break;
+  case 7:
+    world = cornell_smoke();
+    aspect_ratio = 1.0;
+    image_width = 600;
+    samples_per_pixel = 200;
+    lookfrom = point3(278, 278, -800);
+    lookat = point3(278, 278, 0);
+    vfov = 40.0;
+    break;
 
-    default:
-    case 8:
-      world = final_scene();
-      aspect_ratio = 1.0;
-      image_width = 800;
-      samples_per_pixel = 1000;
-      lookfrom = point3(478, 278, -600);
-      lookat = point3(278, 278, 0);
-      vfov = 40.0;
-      break;
+  default:
+  case 8:
+    world = final_scene();
+    aspect_ratio = 1.0;
+    image_width = 400;
+    samples_per_pixel = 100;
+    lookfrom = point3(478, 278, -600);
+    lookat = point3(278, 278, 0);
+    vfov = 40.0;
+    break;
   }
 
   // Camera
@@ -399,15 +405,16 @@ int main() {
   std::unique_ptr<unsigned char> image_data(
       new unsigned char[static_cast<unsigned long>(image_width * image_height *
                                                    3)]);
-  thread_pool pool(4);
+  const int num_threads = 4;
+  thread_pool pool(num_threads);
   std::vector<std::future<void>> results;
+
+  auto start = std::chrono::steady_clock::now();
 
   for (int j = image_height - 1; j >= 0; --j) {
     results.emplace_back(pool.enqueue([j, &image_data, &image_width,
                                        &image_height, &samples_per_pixel, &cam,
                                        &background, &world, &max_depth]() {
-      // print thread Id
-      auto start = std::chrono::steady_clock::now();
       for (int i = 0; i < image_width; ++i) {
         const auto pixel_index = ((image_height - 1 - j) * image_width + i) * 3;
         color pixel_color(0, 0, 0);
@@ -419,24 +426,20 @@ int main() {
         }
         write_pixel(image_data, pixel_index, pixel_color, samples_per_pixel);
       }
-      auto end = std::chrono::steady_clock::now();
-
-      // Calculate the duration in microseconds (or other time units if desired)
-      auto duration =
-          std::chrono::duration_cast<std::chrono::microseconds>(end - start)
-              .count();
-      std::cout << "\rFinished rendering scanline: " << j << " on thread "
-                << std::this_thread::get_id() << ". Time taken " << duration / 1000000.0
-                << " seconds." << std::endl;
     }));
   }
 
-  for (auto&& result : results) {
+  for (auto &&result : results) {
     result.get();
   }
 
+  auto end = std::chrono::steady_clock::now();
+  auto duration =
+      std::chrono::duration_cast<std::chrono::microseconds>(end - start)
+          .count();
+  std::cout << "\rFinished rendering on " << num_threads << " threads in "
+            << duration / 1000000.0 << " seconds." << std::endl;
+
   stbi_write_png("image.png", image_width, image_height, 3, image_data.get(),
                  image_width * 3);
-
-  std::cerr << "\nDone.\n";
 }

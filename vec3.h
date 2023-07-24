@@ -10,7 +10,7 @@ using std::fabs;
 using std::sqrt;
 
 class vec3 {
- public:
+public:
   vec3() : e{0, 0, 0} {}
   vec3(double e0, double e1, double e2) : e{e0, e1, e2} {}
 
@@ -59,13 +59,13 @@ class vec3 {
                 random_double(min, max));
   }
 
- public:
+public:
   double e[3];
 };
 
 // Type aliases for vec3
-using point3 = vec3;  // 3D point
-using color = vec3;   // RGB color
+using point3 = vec3; // 3D point
+using color = vec3;  // RGB color
 
 // vec3 Utility Functions
 
@@ -108,7 +108,8 @@ inline vec3 unit_vector(vec3 v) { return v / v.length(); }
 inline vec3 random_in_unit_disk() {
   while (true) {
     auto p = vec3(random_double(-1, 1), random_double(-1, 1), 0);
-    if (p.length_squared() >= 1) continue;
+    if (p.length_squared() >= 1)
+      continue;
     return p;
   }
 }
@@ -116,7 +117,8 @@ inline vec3 random_in_unit_disk() {
 inline vec3 random_in_unit_sphere() {
   while (true) {
     auto p = vec3::random(-1, 1);
-    if (p.length_squared() >= 1) continue;
+    if (p.length_squared() >= 1)
+      continue;
     return p;
   }
 }
@@ -127,8 +129,7 @@ inline vec3 random_unit_vector() {
 
 inline vec3 random_in_hemisphere(const vec3 &normal) {
   vec3 in_unit_sphere = random_in_unit_sphere();
-  if (dot(in_unit_sphere, normal) >
-      0.0)  // In the same hemisphere as the normal
+  if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
     return in_unit_sphere;
   else
     return -in_unit_sphere;

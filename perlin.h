@@ -4,7 +4,7 @@
 #include "rtweekend.h"
 
 class perlin {
- public:
+public:
   perlin() {
     ranvec = new vec3[point_count];
     for (int i = 0; i < point_count; ++i) {
@@ -23,7 +23,7 @@ class perlin {
     delete[] perm_z;
   }
 
-  double noise(const point3& p) const {
+  double noise(const point3 &p) const {
     auto u = p.x() - floor(p.x());
     auto v = p.y() - floor(p.y());
     auto w = p.z() - floor(p.z());
@@ -42,7 +42,7 @@ class perlin {
     return perlin_interp(c, u, v, w);
   }
 
-  double turb(const point3& p, int depth = 7) const {
+  double turb(const point3 &p, int depth = 7) const {
     auto accum = 0.0;
     auto temp_p = p;
     auto weight = 1.0;
@@ -56,24 +56,25 @@ class perlin {
     return fabs(accum);
   }
 
- private:
+private:
   static const int point_count = 256;
-  vec3* ranvec;
-  int* perm_x;
-  int* perm_y;
-  int* perm_z;
+  vec3 *ranvec;
+  int *perm_x;
+  int *perm_y;
+  int *perm_z;
 
-  static int* perlin_generate_perm() {
+  static int *perlin_generate_perm() {
     auto p = new int[point_count];
 
-    for (int i = 0; i < point_count; i++) p[i] = i;
+    for (int i = 0; i < point_count; i++)
+      p[i] = i;
 
     permute(p, point_count);
 
     return p;
   }
 
-  static void permute(int* p, int n) {
+  static void permute(int *p, int n) {
     for (int i = n - 1; i > 0; i--) {
       int target = random_int(0, i);
       int tmp = p[i];
