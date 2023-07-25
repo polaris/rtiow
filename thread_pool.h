@@ -10,8 +10,8 @@
 
 class thread_pool {
 public:
-  thread_pool(size_t threads) : stop(false), active_tasks(0) {
-    for (size_t i = 0; i < threads; ++i)
+  thread_pool(int threads) : stop(false), active_tasks(0) {
+    for (int i = 0; i < threads; ++i)
       workers.emplace_back([this] {
         for (;;) {
           std::function<void()> task;

@@ -5,20 +5,20 @@
 
 class ray {
 public:
-  ray() {}
-  ray(const point3 &origin, const vec3 &direction, double time = 0.0)
-      : orig(origin), dir(direction), tm(time) {}
+  constexpr ray() : orig_(), dir_(), tm_(0.0) {}
+  constexpr ray(const point3 &origin, const vec3 &direction, double time = 0.0)
+      : orig_(origin), dir_(direction), tm_(time) {}
 
-  point3 origin() const { return orig; }
-  vec3 direction() const { return dir; }
-  double time() const { return tm; }
+  constexpr point3 origin() const { return orig_; }
+  constexpr vec3 direction() const { return dir_; }
+  constexpr double time() const { return tm_; }
 
-  point3 at(double t) const { return orig + t * dir; }
+  constexpr point3 at(double t) const { return orig_ + t * dir_; }
 
-public:
-  point3 orig;
-  vec3 dir;
-  double tm;
+private:
+  point3 orig_;
+  vec3 dir_;
+  double tm_;
 };
 
 #endif

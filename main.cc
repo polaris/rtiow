@@ -269,36 +269,6 @@ hittable_list final_scene() {
   return objects;
 }
 
-void write_pixel(std::unique_ptr<unsigned char> &image_data, int pixel_index,
-                 const color &pixel_color, int samples_per_pixel) {
-  auto r = pixel_color.x();
-  auto g = pixel_color.y();
-  auto b = pixel_color.z();
-
-  // Replace NaN components with zero. See explanation in Ray Tracing: The
-  // Rest of Your Life.
-  if (r != r)
-    r = 0.0;
-  if (g != g)
-    g = 0.0;
-  if (b != b)
-    b = 0.0;
-
-  // Divide the color by the number of samples and gamma-correct for
-  // gamma=2.0.
-  auto scale = 1.0 / samples_per_pixel;
-  r = sqrt(scale * r);
-  g = sqrt(scale * g);
-  b = sqrt(scale * b);
-
-  image_data.get()[pixel_index + 0] =
-      static_cast<unsigned char>(256 * clamp(r, 0.0, 0.999));
-  image_data.get()[pixel_index + 1] =
-      static_cast<unsigned char>(256 * clamp(g, 0.0, 0.999));
-  image_data.get()[pixel_index + 2] =
-      static_cast<unsigned char>(256 * clamp(b, 0.0, 0.999));
-}
-
 int main() {
   // Image
 
@@ -318,8 +288,10 @@ int main() {
   color background(0, 0, 0);
 
   switch (0) {
+  default:
   case 1:
     world = random_scene();
+    image_width = 800;
     background = color(0.70, 0.80, 1.00);
     lookfrom = point3(13, 2, 3);
     lookat = point3(0, 0, 0);
@@ -379,7 +351,6 @@ int main() {
     vfov = 40.0;
     break;
 
-  default:
   case 8:
     world = final_scene();
     aspect_ratio = 1.0;
@@ -393,9 +364,9 @@ int main() {
 
   // Camera
 
-  const vec3 vup(0, 1, 0);
-  const auto dist_to_focus = 10.0;
-  const int image_height = static_cast<int>(image_width / aspect_ratio);
+  constexpr vec3 vup(0, 1, 0);
+  constexpr auto dist_to_focus = 10.0;
+  int image_height = static_cast<int>(image_width / aspect_ratio);
 
   camera cam(lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus,
              0.0, 1.0);
@@ -406,18 +377,17 @@ int main() {
       new unsigned char[static_cast<unsigned long>(image_width * image_height *
                                                    3)]);
   const int num_threads =
-      std::thread::hardware_concurrency(); // Use all available cores
+      static_cast<int>(std::thread::hardware_concurrency()); // Use all available cores
   thread_pool pool(num_threads);
 
-  const int blockSize = 2;
+  constexpr int blockSize = 2;
 
   const auto start = std::chrono::steady_clock::now();
 
   for (int blockStart = image_height - 1; blockStart >= 0;
        blockStart -= blockSize) {
-    pool.enqueue([blockStart, blockSize, &image_data, &image_width,
-                  &image_height, &samples_per_pixel, &cam, &background, &world,
-                  &max_depth]() {
+    pool.enqueue([blockStart, &image_data, &image_width, &image_height,
+                  &samples_per_pixel, &cam, &background, &world, &max_depth]() {
       const int blockEnd = std::max(0, blockStart - blockSize);
       for (int j = blockStart; j > blockEnd; --j) {
         for (int i = 0; i < image_width; ++i) {
