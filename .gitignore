@@ -3,3 +3,5 @@ build
 images
 a.out
 *.ppm
+
+CMakeUserPresets.json
