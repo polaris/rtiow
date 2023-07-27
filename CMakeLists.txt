@@ -13,10 +13,18 @@ set(CMAKE_CXX_FLAGS "-std=c++20 -Wall -Wextra -Wpedantic -Wconversion -Wsign-con
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-add_executable(rtiow main.cc vec3.cc)
+set(COMMON_SOURCES
+    vec3.cc
+)
+
+add_library(common_objects OBJECT ${COMMON_SOURCES})
+
+add_executable(rtiow main.cc)
 set_property(TARGET rtiow PROPERTY CXX_STANDARD 20)
 set_property(TARGET rtiow PROPERTY CXX_STANDARD_REQUIRED ON)
-target_link_libraries(rtiow LINK_PRIVATE stdc++ stb::stb)
+target_link_libraries(rtiow LINK_PRIVATE stdc++ stb::stb common_objects)
 
-add_executable(tests aabb_test.cc thread_pool_tests.cc vec3_test.cc vec3.cc)
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
+add_executable(tests aabb_test.cc thread_pool_tests.cc vec3_test.cc)
+set_property(TARGET tests PROPERTY CXX_STANDARD 20)
+set_property(TARGET tests PROPERTY CXX_STANDARD_REQUIRED ON)
+target_link_libraries(tests PRIVATE Catch2::Catch2WithMain common_objects)
