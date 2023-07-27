@@ -18,5 +18,5 @@ set_property(TARGET rtiow PROPERTY CXX_STANDARD 20)
 set_property(TARGET rtiow PROPERTY CXX_STANDARD_REQUIRED ON)
 target_link_libraries(rtiow LINK_PRIVATE stdc++ stb::stb)
 
-add_executable(tests aabb_test.cc vec3_test.cc vec3.cc)
+add_executable(tests aabb_test.cc thread_pool_tests.cc vec3_test.cc vec3.cc)
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
