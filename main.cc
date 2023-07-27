@@ -376,8 +376,8 @@ int main() {
   std::unique_ptr<unsigned char> image_data(
       new unsigned char[static_cast<unsigned long>(image_width * image_height *
                                                    3)]);
-  const int num_threads =
-      static_cast<int>(std::thread::hardware_concurrency()); // Use all available cores
+  const int num_threads = static_cast<int>(
+      std::thread::hardware_concurrency()); // Use all available cores
   thread_pool pool(num_threads);
 
   constexpr int blockSize = 2;
