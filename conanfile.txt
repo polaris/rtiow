@@ -1,7 +1,0 @@
-[requires]
-catch2/3.4.0
-stb/cci.20220909
-
-[generators]
-CMakeDeps
-CMakeToolchain
