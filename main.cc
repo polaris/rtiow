@@ -373,7 +373,7 @@ int main() {
 
   // Render
 
-  std::unique_ptr<unsigned char> image_data(
+  std::unique_ptr<unsigned char []> image_data(
       new unsigned char[static_cast<unsigned long>(image_width * image_height *
                                                    3)]);
   const int num_threads = static_cast<int>(

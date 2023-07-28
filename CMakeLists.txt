@@ -55,6 +55,7 @@ apply_common_compile_options(rtiow)
 
 add_executable(tests
     aabb_tests.cc
+    color_tests.cc
     thread_pool_tests.cc
     vec3_tests.cc
 )

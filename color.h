@@ -4,7 +4,7 @@
 #include "vec3.h"
 #include <memory>
 
-void write_pixel(std::unique_ptr<unsigned char> &image_data, int pixel_index,
+void write_pixel(std::unique_ptr<unsigned char []> &image_data, int pixel_index,
                  const color &pixel_color, int samples_per_pixel) {
   auto r = pixel_color.x();
   auto g = pixel_color.y();
