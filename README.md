@@ -1,16 +1,28 @@
+# Ray Tracing in One Weekend
+
+This project is based on Peter Shirley's Ray Tracing in One Weekend series.
+
 # Dependencies
 
-* STB
-* Catch2
+This project depend on the unit testing framework Catch2.
 
-# Build
+# How to use it
 
-Resolve and install dependencies. Build packages from source whose binary package is not found.
+## Build
 
-    $ conan install . --output-folder=build --build=missing
-
-Build the source code.
-
+    $ mkdir build
     $ cd build
-    $ cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
-    $ cmake --build .
+    $ cmake .. -DCMAKE_BUILD_TYPE=Release
+    $ cmake --build . -- -j4
+
+## Run unit tests
+
+    # ./tests
+
+## Run benchmarks
+
+    # ./benchmarks
+
+## Run ray tracer
+
+    # ./rtiow
